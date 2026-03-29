@@ -1,218 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoltReserve - Battery Station</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --green: #28a745; --red: #dc3545; --yellow: #ffc107; --blue: #007bff; --dark: #343a40; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .wallet-box { background: var(--dark); color: white; padding: 10px 15px; border-radius: 8px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin: 20px 0; }
-        .slot { padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; font-weight: bold; border: 2px solid transparent; font-size: 14px; }
-        .available { background: #e8f5e9; color: var(--green); border-color: var(--green); }
-        .busy { background: #ffebee; color: var(--red); cursor: not-allowed; }
-        .reserved { background: #fffde7; color: #856404; border-color: var(--yellow); }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
-        button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: none; font-size: 16px; cursor: pointer; font-weight: bold; }
-        .btn-pay { background: var(--green); color: white; }
-        .btn-cancel { background: var(--red); color: white; margin-top: 20px; }
-        #qr-code { margin: 20px auto; display: flex; justify-content: center; }
+        :root {
+            --green: #28a745;
+            --red: #dc3545;
+            --yellow: #ffc107;
+            --blue: #007bff;
+            --dark: #343a40;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .wallet-box {
+            background: var(--dark);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .slot {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid transparent;
+            font-size: 14px;
+        }
+
+        .available {
+            background: #e8f5e9;
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+        .busy {
+            background: #ffebee;
+            color: var(--red);
+            cursor: not-allowed;
+        }
+
+        .reserved {
+            background: #fffde7;
+            color: #856404;
+            border-color: var(--yellow);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-pay {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-cancel {
+            background: var(--red);
+            color: white;
+            margin-top: 20px;
+        }
+
+        #qr-code {
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <header>
-        <h2>⚡ VoltReserve</h2>
-        <div>
-            <label style="margin-right: 15px; font-weight: bold; color: var(--blue);">
-                <input type="checkbox" id="admin-mode" onchange="toggleAdminMode()"> Admin Mode
-            </label>
-            <div class="wallet-box" style="display:inline-block;">Wallet: ₹<span id="balance">1000</span></div>
+    <div class="container">
+        <header>
+            <h2>⚡ ConfirmSlot</h2>
+            <div>
+                <label style="margin-right: 15px; font-weight: bold; color: var(--blue);">
+                    <input type="checkbox" id="admin-mode" onchange="toggleAdminMode()"> Admin Mode
+                </label>
+                <div class="wallet-box" style="display:inline-block;">Wallet: ₹<span id="balance">1000</span></div>
+            </div>
+        </header>
+
+        <p><strong>Note:</strong> 15 mins late = Auto Cancel (No Refund)</p>
+
+        <h4 style="color:var(--blue)">Battery Swapping (₹200)</h4>
+        <div class="grid" id="swap-grid"></div>
+
+        <h4 style="color:var(--blue)">Plug-in Charging (₹50)</h4>
+        <div class="grid" id="plugin-grid"></div>
+
+        <div id="active-booking"
+            style="display:none; background:#eee; padding:15px; border-radius:8px; margin-top:20px;">
+            <p id="booking-details"></p>
+            <button class="btn-cancel" onclick="cancelBooking()">Cancel Booking (Penalty applies)</button>
         </div>
-    </header>
-
-    <p><strong>Note:</strong> 15 mins late = Auto Cancel (No Refund)</p>
-
-    <h4 style="color:var(--blue)">Battery Swapping (₹200)</h4>
-    <div class="grid" id="swap-grid"></div>
-
-    <h4 style="color:var(--blue)">Plug-in Charging (₹50)</h4>
-    <div class="grid" id="plugin-grid"></div>
-
-    <div id="active-booking" style="display:none; background:#eee; padding:15px; border-radius:8px; margin-top:20px;">
-        <p id="booking-details"></p>
-        <button class="btn-cancel" onclick="cancelBooking()">Cancel Booking (Penalty applies)</button>
     </div>
-</div>
 
-<div id="bookingModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modal-title"></h3>
-        <p id="modal-desc"></p>
-        <label>Arrival Time:</label>
-        <select id="time-slot" style="width:100%; padding:10px; margin:10px 0;"></select>
-        <button class="btn-pay" onclick="processPayment()">Pay & Reserve</button>
-        <button onclick="closeModal()" style="background:#ccc;">Go Back</button>
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title"></h3>
+            <p id="modal-desc"></p>
+            <label>Arrival Time:</label>
+            <select id="time-slot" style="width:100%; padding:10px; margin:10px 0;"></select>
+            <button class="btn-pay" onclick="processPayment()">Pay & Reserve</button>
+            <button onclick="closeModal()" style="background:#ccc;">Go Back</button>
+        </div>
     </div>
-</div>
 
-<div id="successModal" class="modal">
-    <div class="modal-content">
-        <h2 style="color:var(--green)">Success!</h2>
-        <div id="qr-code"></div>
-        <p>Save this QR. You have 15 mins relaxation.</p>
-        <button onclick="document.getElementById('successModal').style.display='none'">Close</button>
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--green)">Success!</h2>
+            <div id="qr-code"></div>
+            <p>Save this QR. You have 15 mins relaxation.</p>
+            <button onclick="document.getElementById('successModal').style.display='none'">Close</button>
+        </div>
     </div>
-</div>
 
-<script>
-    let wallet = 1000;
-    let currentBooking = null; // Stores {id, type, price, time}
-    let isAdminMode = false;
-    
-    function toggleAdminMode() {
-        isAdminMode = document.getElementById('admin-mode').checked;
-        if(isAdminMode) alert("Admin Mode Enabled: Click on any slot to change its status (Available -> Busy -> Reserved).");
-    }
+    <script>
+        let wallet = 1000;
+        let currentBooking = null; // Stores {id, type, price, time}
+        let isAdminMode = false;
 
-    function init() {
-        const swapGrid = document.getElementById('swap-grid');
-        const pluginGrid = document.getElementById('plugin-grid');
-        
-        // All slots start as available. Admin can configure them by toggling Admin Mode.
-        for(let i=1; i<=10; i++) {
-            createSlot(swapGrid, `S${i}`, 'available', 'swap');
+        function toggleAdminMode() {
+            isAdminMode = document.getElementById('admin-mode').checked;
+            if (isAdminMode) alert("Admin Mode Enabled: Click on any slot to change its status (Available -> Busy -> Reserved).");
         }
-        for(let i=1; i<=10; i++) {
-            createSlot(pluginGrid, `P${i}`, 'available', 'plugin');
+
+        function init() {
+            const swapGrid = document.getElementById('swap-grid');
+            const pluginGrid = document.getElementById('plugin-grid');
+
+            // All slots start as available. Admin can configure them by toggling Admin Mode.
+            for (let i = 1; i <= 10; i++) {
+                createSlot(swapGrid, `S${i}`, 'available', 'swap');
+            }
+            for (let i = 1; i <= 10; i++) {
+                createSlot(pluginGrid, `P${i}`, 'available', 'plugin');
+            }
+
+            const select = document.getElementById('time-slot');
+            for (let i = 0; i < 24; i++) {
+                let hr1 = i % 12 === 0 ? 12 : i % 12;
+                let ampm1 = i < 12 ? 'AM' : 'PM';
+                let nextI = (i + 1) % 24;
+                let hr2 = nextI % 12 === 0 ? 12 : nextI % 12;
+                let ampm2 = nextI < 12 ? 'AM' : 'PM';
+
+                let timeStr = `${hr1}:00 ${ampm1} - ${hr2}:00 ${ampm2}`;
+                let opt = document.createElement('option');
+                opt.value = timeStr;
+                opt.innerText = timeStr;
+                select.appendChild(opt);
+            }
         }
-        
-        const select = document.getElementById('time-slot');
-        for(let i=0; i<24; i++) {
-            let hr1 = i % 12 === 0 ? 12 : i % 12;
-            let ampm1 = i < 12 ? 'AM' : 'PM';
-            let nextI = (i + 1) % 24;
-            let hr2 = nextI % 12 === 0 ? 12 : nextI % 12;
-            let ampm2 = nextI < 12 ? 'AM' : 'PM';
-            
-            let timeStr = `${hr1}:00 ${ampm1} - ${hr2}:00 ${ampm2}`;
-            let opt = document.createElement('option');
-            opt.value = timeStr; 
-            opt.innerText = timeStr;
-            select.appendChild(opt);
+
+        function createSlot(container, id, status, type) {
+            const div = document.createElement('div');
+            div.className = `slot ${status}`;
+            div.dataset.status = status;
+            div.id = id;
+            div.innerHTML = `${id}<br><small>${status}</small>`;
+            div.onclick = () => handleSlotClick(div, id, type);
+            container.appendChild(div);
         }
-    }
 
-    function createSlot(container, id, status, type) {
-        const div = document.createElement('div');
-        div.className = `slot ${status}`;
-        div.dataset.status = status;
-        div.id = id;
-        div.innerHTML = `${id}<br><small>${status}</small>`;
-        div.onclick = () => handleSlotClick(div, id, type);
-        container.appendChild(div);
-    }
+        function handleSlotClick(div, id, type) {
+            let status = div.dataset.status;
 
-    function handleSlotClick(div, id, type) {
-        let status = div.dataset.status;
-
-        if (isAdminMode) {
-            // Admin cycles through statuses
-            if (status === 'my-reservation') {
-                alert("This is the user's active booking. Cannot overwrite.");
+            if (isAdminMode) {
+                // Admin cycles through statuses
+                if (status === 'my-reservation') {
+                    alert("This is the user's active booking. Cannot overwrite.");
+                    return;
+                }
+                let nextStatus = status === 'available' ? 'busy' : (status === 'busy' ? 'reserved' : 'available');
+                div.dataset.status = nextStatus;
+                div.className = `slot ${nextStatus}`;
+                div.innerHTML = `${id}<br><small>${nextStatus}</small>`;
                 return;
             }
-            let nextStatus = status === 'available' ? 'busy' : (status === 'busy' ? 'reserved' : 'available');
-            div.dataset.status = nextStatus;
-            div.className = `slot ${nextStatus}`;
-            div.innerHTML = `${id}<br><small>${nextStatus}</small>`;
-            return;
+
+            // Normal User behavior
+            if (status === 'available') {
+                openBooking(id, type);
+            } else if (status === 'busy') {
+                alert("This battery is currently being charged and is not available.");
+            } else if (status === 'reserved') {
+                alert("This battery is fully charged but already reserved by another user.");
+            } else if (status === 'my-reservation') {
+                alert("This is your active reservation. You can manage it below.");
+            }
         }
 
-        // Normal User behavior
-        if (status === 'available') {
-            openBooking(id, type);
-        } else if (status === 'busy') {
-            alert("This battery is currently being charged and is not available.");
-        } else if (status === 'reserved') {
-            alert("This battery is fully charged but already reserved by another user.");
-        } else if (status === 'my-reservation') {
-            alert("This is your active reservation. You can manage it below.");
+        function openBooking(id, type) {
+            if (currentBooking) { alert("You already have a reservation!"); return; }
+            currentBooking = { id, type, price: type === 'swap' ? 200 : 50 };
+            document.getElementById('modal-title').innerText = "Reserve " + id;
+            document.getElementById('modal-desc').innerText = "Fee: ₹" + currentBooking.price;
+            document.getElementById('bookingModal').style.display = 'flex';
         }
-    }
 
-    function openBooking(id, type) {
-        if(currentBooking) { alert("You already have a reservation!"); return; }
-        currentBooking = { id, type, price: type==='swap'?200:50 };
-        document.getElementById('modal-title').innerText = "Reserve " + id;
-        document.getElementById('modal-desc').innerText = "Fee: ₹" + currentBooking.price;
-        document.getElementById('bookingModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('bookingModal').style.display = 'none';
-        if(!currentBooking.paid) currentBooking = null;
-    }
-
-    function processPayment() {
-        if(wallet < currentBooking.price) { alert("Insufficient wallet funds!"); return; }
-        
-        wallet -= currentBooking.price;
-        currentBooking.paid = true;
-        currentBooking.time = document.getElementById('time-slot').value;
-        
-        updateUI();
-        document.getElementById('bookingModal').style.display = 'none';
-        showQR();
-    }
-
-    function updateUI() {
-        document.getElementById('balance').innerText = wallet;
-        if(currentBooking) {
-            const el = document.getElementById(currentBooking.id);
-            el.className = 'slot reserved';
-            el.dataset.status = 'my-reservation';
-            el.innerHTML = `${currentBooking.id}<br><small>MY BOOKING</small>`;
-            // onclick is handled by handleSlotClick which reads dataset.status
-            document.getElementById('active-booking').style.display = 'block';
-            document.getElementById('booking-details').innerText = `Reserved ${currentBooking.id} for ${currentBooking.time}`;
+        function closeModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+            if (!currentBooking.paid) currentBooking = null;
         }
-    }
 
-    function cancelBooking() {
-        let penalty = currentBooking.type === 'swap' ? 100 : 50;
-        let refund = currentBooking.price - penalty;
-        wallet += refund;
-        
-        alert(`Booking Cancelled.\nPenalty: ₹${penalty}\nRefund: ₹${refund}`);
-        
-        const id = currentBooking.id;
-        const type = currentBooking.type;
-        const el = document.getElementById(id);
-        el.className = 'slot available';
-        el.dataset.status = 'available';
-        el.innerHTML = `${id}<br><small>available</small>`;
-        // onclick remains tied to handleSlotClick
-        
-        currentBooking = null;
-        document.getElementById('balance').innerText = wallet;
-        document.getElementById('active-booking').style.display = 'none';
-    }
+        function processPayment() {
+            if (wallet < currentBooking.price) { alert("Insufficient wallet funds!"); return; }
 
-    function showQR() {
-        document.getElementById('successModal').style.display = 'flex';
-        const qrDiv = document.getElementById('qr-code');
-        qrDiv.innerHTML = "";
-        new QRCode(qrDiv, { text: "VOLT-"+currentBooking.id, width: 128, height: 128 });
-    }
+            wallet -= currentBooking.price;
+            currentBooking.paid = true;
+            currentBooking.time = document.getElementById('time-slot').value;
 
-    init();
-</script>
+            updateUI();
+            document.getElementById('bookingModal').style.display = 'none';
+            showQR();
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = wallet;
+            if (currentBooking) {
+                const el = document.getElementById(currentBooking.id);
+                el.className = 'slot reserved';
+                el.dataset.status = 'my-reservation';
+                el.innerHTML = `${currentBooking.id}<br><small>MY BOOKING</small>`;
+                // onclick is handled by handleSlotClick which reads dataset.status
+                document.getElementById('active-booking').style.display = 'block';
+                document.getElementById('booking-details').innerText = `Reserved ${currentBooking.id} for ${currentBooking.time}`;
+            }
+        }
+
+        function cancelBooking() {
+            let penalty = currentBooking.type === 'swap' ? 100 : 50;
+            let refund = currentBooking.price - penalty;
+            wallet += refund;
+
+            alert(`Booking Cancelled.\nPenalty: ₹${penalty}\nRefund: ₹${refund}`);
+
+            const id = currentBooking.id;
+            const type = currentBooking.type;
+            const el = document.getElementById(id);
+            el.className = 'slot available';
+            el.dataset.status = 'available';
+            el.innerHTML = `${id}<br><small>available</small>`;
+            // onclick remains tied to handleSlotClick
+
+            currentBooking = null;
+            document.getElementById('balance').innerText = wallet;
+            document.getElementById('active-booking').style.display = 'none';
+        }
+
+        function showQR() {
+            document.getElementById('successModal').style.display = 'flex';
+            const qrDiv = document.getElementById('qr-code');
+            qrDiv.innerHTML = "";
+            new QRCode(qrDiv, { text: "VOLT-" + currentBooking.id, width: 128, height: 128 });
+        }
+
+        init();
+    </script>
 </body>
+
 </html>
